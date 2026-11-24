@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 2e12139c0ee03c44f8538d5e505a0942
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 176906
+  packageName: "\0ltimate Nature \n\0\x02\0Star1.3"
+  packageVersion: 1.3.0
+  assetPath: Assets/Scenes/Player/Map Assets/Rocks/River/Prefabs/UNS_Tiny_Rock_01.prefab
+  uploadId: 964150
+AssetOrigin:
+  serializedVersion: 1
+  productId: 176906
+  packageName: "Ultimate Nature \u2013 Starter"
+  packageVersion: 1.3.0
+  assetPath: Assets/Scenes/Player/Map Assets/Rocks/River/Prefabs/UNS_Tiny_Rock_01.prefab
+  uploadId: 964150
