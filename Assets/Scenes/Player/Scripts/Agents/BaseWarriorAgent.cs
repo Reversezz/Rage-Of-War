@@ -7,10 +7,10 @@ public abstract class BaseWarriorAgent : BaseAgent
     {
         Debug.Log($"{name}: попал в OnDie() в BaseWarriorAgent");
 
-        CurrentAnimName = string.Empty;
-        IsReadyTriggered = false;
-        IsBlockOn = false;
-        triggerReadyName = null;
+        if (CurrentAnimName != string.Empty)  CurrentAnimName = string.Empty;
+        if (IsReadyTriggered != false)        IsReadyTriggered = false;
+        if (IsBlockOn != false)               IsBlockOn = false;
+        if (triggerReadyName != null)         triggerReadyName = null;
     }
 
     private void OnDead()

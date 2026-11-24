@@ -18,6 +18,7 @@ public class RayCast : MonoBehaviour
 
     private void Update()
     {
+        // Защита от попадания в мертвых
         if (((BaseWarriorAgent)transform.root).IsDead) return;
 
         float startAngle = -ViewAngle / 2f; // начинаем с угла слева (-60 градус от центра)

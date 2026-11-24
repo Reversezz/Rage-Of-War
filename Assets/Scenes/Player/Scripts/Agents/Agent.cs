@@ -71,9 +71,10 @@ public class Agent : BaseWarriorAgent
     {
         Debug.Log($"{name}: попал в OnDie() в Agent");
 
+        LoseTarget();
         base.OnDie();
-        if (TargetAgent != null) TargetAgent = null;        
     }
+
 
     protected override void OnDisable()
     {
@@ -108,6 +109,7 @@ public class Agent : BaseWarriorAgent
 
     protected override void OnTick(float dt)
     {
+        if (this.IsDead) return;
         base.OnTick(dt);
 
         AgentGravity.AgentGravityUpdate(dt);
@@ -134,6 +136,8 @@ public class Agent : BaseWarriorAgent
         StartAttackCooldown();
         if (IsReadyTriggered) ReleaseAttack();  // не стоять вечно в замахе (или добавить в аниматор триггер отмены замаха)
     }
+
+
 
     // =====================================================================
     //  ДВИЖЕНИЕ

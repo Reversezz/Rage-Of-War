@@ -53,6 +53,8 @@ public class PlayerAgent : BaseWarriorAgent
 
     protected override void Awake()
     {
+        Die += OnDie;
+
         _equipment = GetComponent<Equipment>();
         base.Awake(); // Тут же получаем Gravity и Animator
 
@@ -64,6 +66,12 @@ public class PlayerAgent : BaseWarriorAgent
         _lookAction = InputSystem.actions.FindAction("Look");
         _jumpAction = InputSystem.actions.FindAction("Jump");
         _characterOverview = InputSystem.actions.FindAction("CharacterOverview");
+    }
+
+    protected override void OnDie()
+    {
+        base.OnDie();
+        controller = null;
     }
 
     protected override void Start()
@@ -84,7 +92,8 @@ public class PlayerAgent : BaseWarriorAgent
             Debug.Log($"Мертвых: {GetDeadAgents.Count}");
             _debugCooldown = 2f;
         }
-        
+
+        if (this.IsDead) return;
         base.OnTick(dt);
 
         AgentGravity.AgentGravityUpdate(dt);
@@ -162,7 +171,10 @@ public class PlayerAgent : BaseWarriorAgent
 
 
 
-    protected override void OnLateTick(float dt) => CameraRotation(dt);
+    protected override void OnLateTick(float dt)
+    {
+        if (!this.IsDead) CameraRotation(dt);
+    }
 
     private void CameraRotation(float dt)
     {
