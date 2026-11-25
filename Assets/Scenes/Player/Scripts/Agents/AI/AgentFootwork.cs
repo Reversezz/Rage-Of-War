@@ -7,12 +7,6 @@
 /// </summary>
 public sealed class AgentFootwork
 {
-    /// <summary>
-    /// true: враг держит блок слева -> агент идёт влево (в свою левую сторону = правый бок врага).
-    /// Если визуально получилось наоборот (в твоей анимации Left/Right зеркальны) — поставь false.
-    /// </summary>
-    //public bool StrafeTowardGuardSide = true;
-
     /// <summary> Что сейчас делают ноги: Idle, MoveLeft или MoveRight. </summary>
     public MovementControlFlags Strafe { get; private set; } = MovementControlFlags.Idle;
 
@@ -67,7 +61,7 @@ public sealed class AgentFootwork
         // 1. Блок сбоку — идём в открытый бок
         if (readsGuard && (enemyGuard == GuardDirection.Left || enemyGuard == GuardDirection.Right))
         {
-            bool toLeft = (enemyGuard == GuardDirection.Left); // == StrafeTowardGuardSide
+            bool toLeft = (enemyGuard == GuardDirection.Left);
             SetStrafe(toLeft ? MovementControlFlags.MoveLeft : MovementControlFlags.MoveRight, Random.Range(0.8f, 1.8f));
             return;
         }
