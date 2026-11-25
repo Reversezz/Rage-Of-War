@@ -85,14 +85,6 @@ public class PlayerAgent : BaseWarriorAgent
     private AttackDirection _validAttackDirection = AttackDirection.None;
     protected override void OnTick(float dt)
     {
-        // временно
-        _debugCooldown -= dt;
-        if (_debugCooldown <= 0f)
-        {
-            Debug.Log($"Мертвых: {GetDeadAgents.Count}");
-            _debugCooldown = 2f;
-        }
-
         if (this.IsDead) return;
         base.OnTick(dt);
 

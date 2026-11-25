@@ -61,7 +61,7 @@ public class Weapon : MonoBehaviour
             else if (hit.CompareTag("Obstacle")) { if (obstacle == null) obstacle = hit; }
         }
 
-        // 1. Щит работает, только если блок РЕАЛЬНО поднят
+        // Щит работает, только если блок РЕАЛЬНО поднят
         if (shield != null)
         {
             _hasHitThisSwing = true;
@@ -99,7 +99,7 @@ public class Weapon : MonoBehaviour
             return SwingHitResult.Shield;
         }
 
-        // 2. Попал в тело, наносится урон
+        // Попал в тело, наносится урон
         if (agent != null)
         {                
             _hasHitThisSwing = true;
@@ -107,7 +107,7 @@ public class Weapon : MonoBehaviour
             return SwingHitResult.AgentBody;
         }
 
-        // 3. Препятствие
+        // Попал в препятствие
         if (obstacle != null)
         {
             _hasHitThisSwing = true;

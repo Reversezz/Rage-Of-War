@@ -31,6 +31,7 @@ public abstract class BaseAgent : MonoBehaviour
             BattleManager.Instance.OnLateTick -= OnLateTick;
         }
 
+        // Удаляем агента из списка тех, кто на карте
         _agentsList?.Remove(this);
     }
 
