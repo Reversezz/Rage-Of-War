@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
@@ -6,11 +6,11 @@ public class Weapon : MonoBehaviour
     public WeaponType WeaponType;
     public WeaponClass WeaponClass;
 
-    [Header("Настройки удара")]
-    [Tooltip("Слои, по которым бьет оружие (Agent, Weapon, Obstacle)")]
+    [Header("РќР°СЃС‚СЂРѕР№РєРё СѓРґР°СЂР°")]
+    [Tooltip("РЎР»РѕРё, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СЊРµС‚ РѕСЂСѓР¶РёРµ (Agent, Weapon, Obstacle)")]
     public LayerMask HitLayers;
 
-    // Типы урона в зависимости от типа оружия
+    // РўРёРїС‹ СѓСЂРѕРЅР° РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РѕСЂСѓР¶РёСЏ
     public DamageType DamageType => WeaponType switch
     {
         WeaponType.OneHanded => DamageType.Cut,
@@ -34,14 +34,14 @@ public class Weapon : MonoBehaviour
 
     private bool _hasHitThisSwing = false;
 
-    // Первый Animation Event удара
+    // РџРµСЂРІС‹Р№ Animation Event СѓРґР°СЂР°
     public void StartSwing()
     {
         _hasHitThisSwing = false;
     }
 
 
-    // Animation Event на кадре удара
+    // Animation Event РЅР° РєР°РґСЂРµ СѓРґР°СЂР°
     public SwingHitResult CheckHit()
     {
         if (WeaponClass == WeaponClass.Shield) return SwingHitResult.None;
@@ -50,27 +50,27 @@ public class Weapon : MonoBehaviour
 
         Collider[] hitColliders = weaponCollider.GetHitColliders(HitLayers);
 
-        // Порядок в массиве Unity не гарантирует ничего, поэтому сначала собираем, потом выбираем по приоритету
+        // РџРѕСЂСЏРґРѕРє РІ РјР°СЃСЃРёРІРµ Unity РЅРµ РіР°СЂР°РЅС‚РёСЂСѓРµС‚ РЅРёС‡РµРіРѕ, РїРѕСЌС‚РѕРјСѓ СЃРЅР°С‡Р°Р»Р° СЃРѕР±РёСЂР°РµРј, РїРѕС‚РѕРј РІС‹Р±РёСЂР°РµРј РїРѕ РїСЂРёРѕСЂРёС‚РµС‚Сѓ
         Collider shield = null, agent = null, obstacle = null;
 
         foreach (var hit in hitColliders)
         {
-            if (hit.transform.root == transform.root) continue; // себя игнорируем
+            if (hit.transform.root == transform.root) continue; // СЃРµР±СЏ РёРіРЅРѕСЂРёСЂСѓРµРј
 
             if      (hit.CompareTag("Shield"))   { if (shield == null) shield = hit; }
             else if (hit.CompareTag("Agent"))    { if (agent == null) agent = hit; }
             else if (hit.CompareTag("Obstacle")) { if (obstacle == null) obstacle = hit; }
         }
 
-        // Щит работает, только если блок РЕАЛЬНО поднят
+        // Р©РёС‚ СЂР°Р±РѕС‚Р°РµС‚, С‚РѕР»СЊРєРѕ РµСЃР»Рё Р±Р»РѕРє Р Р•РђР›Р¬РќРћ РїРѕРґРЅСЏС‚
         if (shield != null)
         {
             _hasHitThisSwing = true;
 
-            // Если попали по щиту и агент действительно в блоке
+            // Р•СЃР»Рё РїРѕРїР°Р»Рё РїРѕ С‰РёС‚Сѓ Рё Р°РіРµРЅС‚ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ РІ Р±Р»РѕРєРµ
             if (shield.TryGetComponent(out Weapon enemyShield))
             {
-                // Если противник был в блоке 
+                // Р•СЃР»Рё РїСЂРѕС‚РёРІРЅРёРє Р±С‹Р» РІ Р±Р»РѕРєРµ 
                 if (IsValidBlock(shield))
                 {
                     if (IsValidBlockDirection(shield))
@@ -81,13 +81,13 @@ public class Weapon : MonoBehaviour
                     {
                         enemyShield.ReceiveBlock(this);
 
-                        // Незначительный урон из-за неправильно поставленного блока
+                        // РќРµР·РЅР°С‡РёС‚РµР»СЊРЅС‹Р№ СѓСЂРѕРЅ РёР·-Р·Р° РЅРµРїСЂР°РІРёР»СЊРЅРѕ РїРѕСЃС‚Р°РІР»РµРЅРЅРѕРіРѕ Р±Р»РѕРєР°
                         OnWeaponHit?.Invoke(CreateData(shield), true);
                     }
                 }
-                // Если противник не был в блоке, но мы всё равно попали по щиту.
-                // Но визуально большая часть анимации явно задела агента,
-                // так что полное отсутствие урона недопустимо
+                // Р•СЃР»Рё РїСЂРѕС‚РёРІРЅРёРє РЅРµ Р±С‹Р» РІ Р±Р»РѕРєРµ, РЅРѕ РјС‹ РІСЃС‘ СЂР°РІРЅРѕ РїРѕРїР°Р»Рё РїРѕ С‰РёС‚Сѓ.
+                // РќРѕ РІРёР·СѓР°Р»СЊРЅРѕ Р±РѕР»СЊС€Р°СЏ С‡Р°СЃС‚СЊ Р°РЅРёРјР°С†РёРё СЏРІРЅРѕ Р·Р°РґРµР»Р° Р°РіРµРЅС‚Р°,
+                // С‚Р°Рє С‡С‚Рѕ РїРѕР»РЅРѕРµ РѕС‚СЃСѓС‚СЃС‚РІРёРµ СѓСЂРѕРЅР° РЅРµРґРѕРїСѓСЃС‚РёРјРѕ
                 else
                 {
                     OnWeaponHit?.Invoke(CreateData(shield), false);
@@ -95,12 +95,12 @@ public class Weapon : MonoBehaviour
                 
             }
 
-            // OnWeaponHit для заблокированного удара больше не вызывается:
-            // иначе будущий TakeDamage в обработчике нанесёт урон сквозь блок.
+            // OnWeaponHit РґР»СЏ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅРѕРіРѕ СѓРґР°СЂР° Р±РѕР»СЊС€Рµ РЅРµ РІС‹Р·С‹РІР°РµС‚СЃСЏ:
+            // РёРЅР°С‡Рµ Р±СѓРґСѓС‰РёР№ TakeDamage РІ РѕР±СЂР°Р±РѕС‚С‡РёРєРµ РЅР°РЅРµСЃС‘С‚ СѓСЂРѕРЅ СЃРєРІРѕР·СЊ Р±Р»РѕРє.
             return SwingHitResult.Shield;
         }
 
-        // Попал в тело, наносится урон
+        // РџРѕРїР°Р» РІ С‚РµР»Рѕ, РЅР°РЅРѕСЃРёС‚СЃСЏ СѓСЂРѕРЅ
         if (agent != null)
         {                
             _hasHitThisSwing = true;
@@ -108,7 +108,7 @@ public class Weapon : MonoBehaviour
             return SwingHitResult.AgentBody;
         }
 
-        // Попал в препятствие
+        // РџРѕРїР°Р» РІ РїСЂРµРїСЏС‚СЃС‚РІРёРµ
         if (obstacle != null)
         {
             _hasHitThisSwing = true;
@@ -150,7 +150,7 @@ public class Weapon : MonoBehaviour
         );
     }
 
-    // Вызывается атакующим мечом
+    // Р’С‹Р·С‹РІР°РµС‚СЃСЏ Р°С‚Р°РєСѓСЋС‰РёРј РјРµС‡РѕРј
     private void ReceiveBlock(Weapon attackerWeapon)
     {
         OnShieldBlocked?.Invoke(attackerWeapon);

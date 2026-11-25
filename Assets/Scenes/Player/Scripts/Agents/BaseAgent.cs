@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,10 +14,10 @@ public abstract class BaseAgent : MonoBehaviour
         }
         else
         {
-            throw new Exception($"Агент {name} НЕ СМОГ подписаться: BattleManager.Instance равен null!");
+            throw new Exception($"РђРіРµРЅС‚ {name} РќР• РЎРњРћР“ РїРѕРґРїРёСЃР°С‚СЊСЃСЏ: BattleManager.Instance СЂР°РІРµРЅ null!");
         }
         
-        // Добавляем агента в список тех, кто на карте (при спавне)
+        // Р”РѕР±Р°РІР»СЏРµРј Р°РіРµРЅС‚Р° РІ СЃРїРёСЃРѕРє С‚РµС…, РєС‚Рѕ РЅР° РєР°СЂС‚Рµ (РїСЂРё СЃРїР°РІРЅРµ)
         _agentsList?.Add(this);
     }
 
@@ -31,25 +31,25 @@ public abstract class BaseAgent : MonoBehaviour
             BattleManager.Instance.OnLateTick -= OnLateTick;
         }
 
-        // Удаляем агента из списка тех, кто на карте (при смерти)
+        // РЈРґР°Р»СЏРµРј Р°РіРµРЅС‚Р° РёР· СЃРїРёСЃРєР° С‚РµС…, РєС‚Рѕ РЅР° РєР°СЂС‚Рµ (РїСЂРё СЃРјРµСЂС‚Рё)
         _agentsList?.Remove(this);
     }
 
 
-    // - - -  ЖИЗНЬ И СМЕРТЬ  - - -
+    // - - -  Р–РР—РќР¬ Р РЎРњР•Р РўР¬  - - -
     public event Action Die;
     public event Action Dead;
 
-    /// <summary> Проверяет, жив ли агент </summary>
+    /// <summary> РџСЂРѕРІРµСЂСЏРµС‚, Р¶РёРІ Р»Рё Р°РіРµРЅС‚ </summary>
     public bool IsAlive => AgentState == AgentState.Active;    
 
-    /// <summary> Проверяет, мёртв ли агент </summary>
+    /// <summary> РџСЂРѕРІРµСЂСЏРµС‚, РјС‘СЂС‚РІ Р»Рё Р°РіРµРЅС‚ </summary>
     public bool IsDead => AgentState == AgentState.Killed;    
     
-    // Обработка агента после смерти (конец анимации ивент): отключение коллайдеров
+    // РћР±СЂР°Р±РѕС‚РєР° Р°РіРµРЅС‚Р° РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё (РєРѕРЅРµС† Р°РЅРёРјР°С†РёРё РёРІРµРЅС‚): РѕС‚РєР»СЋС‡РµРЅРёРµ РєРѕР»Р»Р°Р№РґРµСЂРѕРІ
     protected void OnDeath()
     {
-        // Для отключения коллайдеров уже когда персонаж упал
+        // Р”Р»СЏ РѕС‚РєР»СЋС‡РµРЅРёСЏ РєРѕР»Р»Р°Р№РґРµСЂРѕРІ СѓР¶Рµ РєРѕРіРґР° РїРµСЂСЃРѕРЅР°Р¶ СѓРїР°Р»
         Dead?.Invoke();
     }
 
@@ -62,13 +62,13 @@ public abstract class BaseAgent : MonoBehaviour
         {
             AgentGravity = agentGravity;
         }
-        else throw new Exception($"Агент {name} НЕ СМОГ получить компонент Gravity!");
+        else throw new Exception($"РђРіРµРЅС‚ {name} РќР• РЎРњРћР“ РїРѕР»СѓС‡РёС‚СЊ РєРѕРјРїРѕРЅРµРЅС‚ Gravity!");
 
         AgentState = AgentState.Active;
         Health = 200;
     }
 
-    // Список агентов
+    // РЎРїРёСЃРѕРє Р°РіРµРЅС‚РѕРІ
     private static readonly List<BaseAgent> _agentsList = new();
     public List<BaseAgent> AllAgents => _agentsList;
 
@@ -76,11 +76,11 @@ public abstract class BaseAgent : MonoBehaviour
     public List<BaseAgent> GetDeadAgents => _agentsList.Where(agent => agent.AgentState == AgentState.Killed).ToList<BaseAgent>();
 
 
-    // Аниматор нужен базовому классу для вызова триггеров
+    // РђРЅРёРјР°С‚РѕСЂ РЅСѓР¶РµРЅ Р±Р°Р·РѕРІРѕРјСѓ РєР»Р°СЃСЃСѓ РґР»СЏ РІС‹Р·РѕРІР° С‚СЂРёРіРіРµСЂРѕРІ
     protected Animator Animator;
 
 
-    // Базовые наследуемые свойства
+    // Р‘Р°Р·РѕРІС‹Рµ РЅР°СЃР»РµРґСѓРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
     public Gravity AgentGravity { get; protected set; }    
     public AgentState AgentState { get; protected set; }
 
@@ -88,15 +88,15 @@ public abstract class BaseAgent : MonoBehaviour
     public int Health { get; protected set; } 
 
     /// <summary>
-    /// Вызывается каждый тик (Time.deltaTime)
+    /// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє (Time.deltaTime)
     /// </summary>
     /// <param name="dt"></param>
     protected virtual void OnTick(float dt)
     {
-        // Если мёртв, скипаем в зародыше всю логику агента
+        // Р•СЃР»Рё РјС‘СЂС‚РІ, СЃРєРёРїР°РµРј РІ Р·Р°СЂРѕРґС‹С€Рµ РІСЃСЋ Р»РѕРіРёРєСѓ Р°РіРµРЅС‚Р°
         if (IsDead) return;
 
-        // Постоянно проверяем что у агента хп больше 0
+        // РџРѕСЃС‚РѕСЏРЅРЅРѕ РїСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Сѓ Р°РіРµРЅС‚Р° С…Рї Р±РѕР»СЊС€Рµ 0
         if (this.Health <= 0)
         {
             AgentState = AgentState.Killed;
@@ -109,7 +109,7 @@ public abstract class BaseAgent : MonoBehaviour
     }
 
     /// <summary>
-    /// Вызывается каждый тик (Time.deltaTime) после OnTick()
+    /// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє (Time.deltaTime) РїРѕСЃР»Рµ OnTick()
     /// </summary>
     /// <param name="dt"></param>
     protected virtual void OnLateTick(float dt) 
@@ -117,6 +117,6 @@ public abstract class BaseAgent : MonoBehaviour
 
     protected virtual void Movement(float dt) { }
 
-    // AI версия
+    // AI РІРµСЂСЃРёСЏ
     protected virtual void Movement(float dt, out float distanceToTarget) { distanceToTarget = 0f; }
 }

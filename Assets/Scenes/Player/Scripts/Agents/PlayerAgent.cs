@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,13 +7,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerAgent : BaseWarriorAgent
 {
-    [Header("Компоненты")]
+    [Header("РљРѕРјРїРѕРЅРµРЅС‚С‹")]
     public CharacterController controller;
 
-    [Header("Снаряжение")]
+    [Header("РЎРЅР°СЂСЏР¶РµРЅРёРµ")]
     [SerializeField] private Equipment _equipment;
 
-    [Header("Команда")]
+    [Header("РљРѕРјР°РЅРґР°")]
     [SerializeField] private Material _team;
 
     private InputAction _lookAction;
@@ -36,7 +36,7 @@ public class PlayerAgent : BaseWarriorAgent
     private float _cinemachineTargetYaw;
     private float _cinemachineTargetPitch;
 
-    [Header("Настройки")]
+    [Header("РќР°СЃС‚СЂРѕР№РєРё")]
     public float MoveSpeed = 1.5f;
     public float SprintSpeed = 4f;
     public float JumpHeight = 1.5f;
@@ -56,7 +56,7 @@ public class PlayerAgent : BaseWarriorAgent
         Die += OnDie;
 
         _equipment = GetComponent<Equipment>();
-        base.Awake(); // Тут же получаем Gravity и Animator
+        base.Awake(); // РўСѓС‚ Р¶Рµ РїРѕР»СѓС‡Р°РµРј Gravity Рё Animator
 
         _attackAction = InputSystem.actions.FindAction("Attack");
         _blockAction = InputSystem.actions.FindAction("Block");
@@ -76,7 +76,7 @@ public class PlayerAgent : BaseWarriorAgent
 
     protected override void Start()
     {
-        base.Start(); // Подписки на оружие из BaseWarriorAgent
+        base.Start(); // РџРѕРґРїРёСЃРєРё РЅР° РѕСЂСѓР¶РёРµ РёР· BaseWarriorAgent
         _cinemachineTargetYaw = playerCameraTarget.eulerAngles.y;
     }
 
@@ -91,13 +91,13 @@ public class PlayerAgent : BaseWarriorAgent
         Movement(dt);
         Jump();
 
-        // СБРОС ФЛАГА: только если мы ничего не нажимаем И мы в пустом состоянии
+        // РЎР‘Р РћРЎ Р¤Р›РђР“Рђ: С‚РѕР»СЊРєРѕ РµСЃР»Рё РјС‹ РЅРёС‡РµРіРѕ РЅРµ РЅР°Р¶РёРјР°РµРј Р РјС‹ РІ РїСѓСЃС‚РѕРј СЃРѕСЃС‚РѕСЏРЅРёРё
         if (!_attackAction.IsPressed() && !_blockAction.IsPressed() && this.Inactive())
         {
             IsReadyTriggered = false;
         }
 
-        // ЛОГИКА АТАКИ
+        // Р›РћР“РРљРђ РђРўРђРљР
         if (_attackAction.IsPressed() && !_blockAction.IsPressed())
         {
             if (!IsReadyTriggered && !this.InAttackAction() && !this.InReboundFromAttackAction())
@@ -116,13 +116,13 @@ public class PlayerAgent : BaseWarriorAgent
             }
         }
 
-        // ОТПУСКАНИЕ АТАКИ (вместо события canceled)
+        // РћРўРџРЈРЎРљРђРќРР• РђРўРђРљР (РІРјРµСЃС‚Рѕ СЃРѕР±С‹С‚РёСЏ canceled)
         if (_attackAction.WasReleasedThisFrame())
         {
             ReleaseAttack();
         }
 
-        // ЛОГИКА БЛОКА
+        // Р›РћР“РРљРђ Р‘Р›РћРљРђ
         if (_blockAction.IsPressed() && !_attackAction.IsPressed())
         {
             if (!this.InAttackAction() && !this.InReboundFromBlockAction())
@@ -132,7 +132,7 @@ public class PlayerAgent : BaseWarriorAgent
             }
         }
 
-        // ОТПУСКАНИЕ БЛОКА (вместо события canceled)
+        // РћРўРџРЈРЎРљРђРќРР• Р‘Р›РћРљРђ (РІРјРµСЃС‚Рѕ СЃРѕР±С‹С‚РёСЏ canceled)
         if (_blockAction.WasReleasedThisFrame())
         {
             UnBlock();
@@ -228,10 +228,10 @@ public class PlayerAgent : BaseWarriorAgent
         Vector2 look = _lookAction.ReadValue<Vector2>();
         float threshold = 0.2f;
 
-        // Общая сила движения мыши достаточная?
+        // РћР±С‰Р°СЏ СЃРёР»Р° РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё РґРѕСЃС‚Р°С‚РѕС‡РЅР°СЏ?
         if (look.sqrMagnitude >= threshold * threshold)
         {
-            // Определяем доминирующую ось и смотрим её знак
+            // РћРїСЂРµРґРµР»СЏРµРј РґРѕРјРёРЅРёСЂСѓСЋС‰СѓСЋ РѕСЃСЊ Рё СЃРјРѕС‚СЂРёРј РµС‘ Р·РЅР°Рє
             if (Mathf.Abs(look.x) > Mathf.Abs(look.y))
             {
                 return look.x > 0 ? CameraDirection.Right : CameraDirection.Left;

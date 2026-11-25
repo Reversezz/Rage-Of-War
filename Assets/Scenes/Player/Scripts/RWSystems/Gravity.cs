@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 
 [RequireComponent(typeof(CharacterController))]
@@ -8,26 +8,26 @@ public class Gravity : MonoBehaviour
     public CharacterController controller;
 
 
-    // Сила гравитации
+    // РЎРёР»Р° РіСЂР°РІРёС‚Р°С†РёРё
     public const float GravityValue = -9.81f;
 
     public Vector3 AgentVelocity;    
     public bool isGrounded;
     
 
-    /// <summary> Обновление гравитации каждый тик </summary>
+    /// <summary> РћР±РЅРѕРІР»РµРЅРёРµ РіСЂР°РІРёС‚Р°С†РёРё РєР°Р¶РґС‹Р№ С‚РёРє </summary>
     public void AgentGravityUpdate(float dt)
     {
         isGrounded = controller.isGrounded;
 
         if (isGrounded)
         {
-            // Небольшая скорость вниз, чтобы удерживать персонажа устойчиво на земле
+            // РќРµР±РѕР»СЊС€Р°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РІРЅРёР·, С‡С‚РѕР±С‹ СѓРґРµСЂР¶РёРІР°С‚СЊ РїРµСЂСЃРѕРЅР°Р¶Р° СѓСЃС‚РѕР№С‡РёРІРѕ РЅР° Р·РµРјР»Рµ
             if (AgentVelocity.y < -2f)
                 AgentVelocity.y = -2f;
         }
 
-        // Применяем гравитацию
+        // РџСЂРёРјРµРЅСЏРµРј РіСЂР°РІРёС‚Р°С†РёСЋ
         AgentVelocity.y += GravityValue * dt;
     }
 }
