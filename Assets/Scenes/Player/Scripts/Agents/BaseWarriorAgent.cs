@@ -83,8 +83,6 @@ public abstract class BaseWarriorAgent : BaseAgent
         throw new MissingComponentException($"Не удалось найти компонент агента у {AgentRoot.name} в explicit operator BaseWarriorAgent()");
     }
 
-    public CognitiveAbilities CognitiveAbilities { get; protected set; }
-
     public MovementControlFlags MovementControlFlags { get; set; }
 
     public AgentActionStateType CurrentActionState
@@ -139,8 +137,6 @@ public abstract class BaseWarriorAgent : BaseAgent
             else return GuardDirection.None;
         }
     }
-
-    public CognitiveAbilities AgentСharacteristics { get; }
 
     // Рабочие поля
     public Vector3 Position;

@@ -112,6 +112,27 @@ public static class RWExtensions
         };
     }
 
-
     public static bool InRange(this float f, float min, float max) => (min <= f) && (max >= f);
+
+    // Любое движения в указанном направление
+    private const MovementControlFlags ForwardMask = MovementControlFlags.MoveForward | MovementControlFlags.RunForward;
+    private const MovementControlFlags BackwardMask = MovementControlFlags.MoveBackward | MovementControlFlags.RunBackward;
+    private const MovementControlFlags RightMask = MovementControlFlags.MoveRight | MovementControlFlags.RunRight;
+    private const MovementControlFlags LeftMask = MovementControlFlags.MoveLeft | MovementControlFlags.RunLeft;
+
+    // Если ВООБЩЕ бежит в любую сторону
+    private const MovementControlFlags RunMask = MovementControlFlags.RunForward | MovementControlFlags.RunBackward
+                                                    | MovementControlFlags.RunRight | MovementControlFlags.RunLeft;
+
+    /// <summary> Флаги -> направление: x = вправо, y = вперёд. Диагональ нормализуется, пустые флаги = стоим. </summary>
+    public static Vector2 ToLocalDirection(this MovementControlFlags flags, out bool run)
+    {
+        run = (flags & RunMask) != 0;
+
+        float x = ((flags & RightMask) != 0 ? 1f : 0f) - ((flags & LeftMask) != 0 ? 1f : 0f);
+        float z = ((flags & ForwardMask) != 0 ? 1f : 0f) - ((flags & BackwardMask) != 0 ? 1f : 0f);
+
+        Vector2 dir = new Vector2(x, z);
+        return dir.sqrMagnitude > 1f ? dir.normalized : dir;
+    }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reflection.Metadata.Ecma335;
 using UnityEngine;
-using static System.Collections.Specialized.BitVector32;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(CharacterController))]
@@ -21,10 +19,8 @@ public class Agent : BaseWarriorAgent
     public float SpeedChangeRate = 10f;
     public float AnimSmoothTime = 0.12f;
 
-    private Vector3 _smoothedMoveWorld;
-    private Vector3 _smoothedMove;
-    private float _currentSpeed;
-    private float _targetSpeed;
+    private AgentLocomotion _locomotion;
+    private AgentFootwork _footwork;
 
     [Header("Настройки ИИ")]
     [Tooltip("Расстояние между агентами в стычке")]
@@ -50,17 +46,21 @@ public class Agent : BaseWarriorAgent
     public override Team Team => (Team)_team;
     public override Equipment Equipment => _equipment;
 
+    private CognitiveAbilities _agentCognitiveAbilities;
+
     private RayCast _rayCast;
 
     protected override void Awake()
     {
-        _equipment = GetComponent<Equipment>();
         base.Awake();
 
         Die += OnDie;
 
+        _locomotion = new AgentLocomotion(transform, controller, Animator);
+        _footwork = new AgentFootwork();
+
         // Характеристики нужно создавать явно: до этого свойство было нулевой структурой
-        CognitiveAbilities = new CognitiveAbilities(_talentBonus);
+        _agentCognitiveAbilities = new CognitiveAbilities(_talentBonus);
         _attackCooldown = RollAttackCooldown();
 
         _rayCast = GetComponent<RayCast>();
@@ -124,7 +124,7 @@ public class Agent : BaseWarriorAgent
             return;
         }
 
-        UpdateMovementFlags(distance);
+        UpdateMovementFlags(dt, distance);
         UpdateDefense(dt, distance);
         UpdateOffense(dt, distance);
     }
@@ -135,6 +135,8 @@ public class Agent : BaseWarriorAgent
         EndDefense();                           // опустить блок, сбросить решения защиты
         StartAttackCooldown();
         if (IsReadyTriggered) ReleaseAttack();  // не стоять вечно в замахе (или добавить в аниматор триггер отмены замаха)
+        MovementControlFlags = MovementControlFlags.Idle;
+        _footwork?.Reset();
     }
 
 
@@ -143,28 +145,44 @@ public class Agent : BaseWarriorAgent
     //  ДВИЖЕНИЕ
     // =====================================================================
 
-    private void UpdateMovementFlags(float distance)
+    private void UpdateMovementFlags(float dt, float distance)
     {
-        if (distance >= 7f)                            MovementControlFlags |= MovementControlFlags.RunForward;   // далеко
-        else if (distance > DistanceBetweenTheAgents)  MovementControlFlags |= MovementControlFlags.MoveForward;  // идём
-        else if (distance >= MinAttackDistance)        MovementControlFlags |= MovementControlFlags.Idle;         // оптимально
-        else                                           MovementControlFlags |= MovementControlFlags.MoveBackward; // слишком близко
+        // Кружить можно только в стычке и пока сами не в ударе
+        bool canStrafe = distance <= AwarenessDistance && !this.InAttackAction();
+        _footwork.Tick(dt, _agentCognitiveAbilities, TargetAgent.GuardDirection, canStrafe);
+
+        // Боковой шаг + подход/отход по дистанции = диагональ. Флаги пересобираются каждый тик
+        MovementControlFlags flags = _footwork.Strafe;
+
+        if (distance >= 7f) flags = MovementControlFlags.RunForward;
+        else if (distance > DistanceBetweenTheAgents) flags |= MovementControlFlags.MoveForward;
+        else if (distance < MinAttackDistance) flags |= MovementControlFlags.MoveBackward;
+
+        MovementControlFlags = flags;
     }
 
     protected override void Movement(float dt, out float distance)
     {
+        // Синхронизируем настройки, чтобы правка в инспекторе работала в Play
+        _locomotion.MoveSpeed = MoveSpeed;
+        _locomotion.SprintSpeed = SprintSpeed;
+        _locomotion.SmoothTime = AnimSmoothTime;
+
+        float gravityY = AgentGravity.AgentVelocity.y;
+
         if (TargetAgent == null)
         {
             distance = 0f;
-            MoveAgentLogic(dt, Vector3.zero, false); // чтобы гравитация реально двигала контроллер
+            MovementControlFlags = MovementControlFlags.Idle;
+            _locomotion.Tick(dt, MovementControlFlags.Idle, transform.forward, gravityY);
             return;
         }
 
         Vector3 toTarget = TargetAgent.transform.position - transform.position;
         toTarget.y = 0f;
-
         distance = toTarget.magnitude;
-        Vector3 direction = distance > 0.0001f ? toTarget / distance : Vector3.zero;
+
+        Vector3 direction = distance > 0.0001f ? toTarget / distance : transform.forward;
 
         if (toTarget.sqrMagnitude > 0.01f)
         {
@@ -172,45 +190,7 @@ public class Agent : BaseWarriorAgent
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dt * 10f);
         }
 
-        Vector3 desiredMove = Vector3.zero;
-        bool isSprint = false;
-
-        if (MovementControlFlags.HasFlag(MovementControlFlags.RunForward))
-        {
-            desiredMove = direction;
-            isSprint = true;
-            MovementControlFlags &= ~MovementControlFlags.RunForward;
-        }
-        else if (MovementControlFlags.HasFlag(MovementControlFlags.MoveForward))
-        {
-            desiredMove = direction;
-            MovementControlFlags &= ~MovementControlFlags.MoveForward;
-        }
-        else if (MovementControlFlags.HasFlag(MovementControlFlags.MoveBackward))
-        {
-            desiredMove = -direction;
-            MovementControlFlags &= ~MovementControlFlags.MoveBackward;
-        }
-
-        MovementControlFlags &= ~MovementControlFlags.Idle;
-
-        MoveAgentLogic(dt, desiredMove, isSprint);
-    }
-
-    private void MoveAgentLogic(float dt, Vector3 desiredWorldMove, bool isSprint)
-    {
-        _smoothedMoveWorld = Vector3.Lerp(_smoothedMoveWorld, desiredWorldMove, dt / AnimSmoothTime);
-
-        _targetSpeed = _smoothedMoveWorld.magnitude * (isSprint ? SprintSpeed : MoveSpeed);
-        _currentSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, dt * SpeedChangeRate);
-
-        Vector3 horizontalMove = _smoothedMoveWorld * _currentSpeed;
-        controller.Move((horizontalMove + Vector3.up * AgentGravity.AgentVelocity.y) * dt);
-
-        Vector3 localMove = transform.InverseTransformDirection(_smoothedMoveWorld);
-
-        Animator.SetFloat("Velocity X", localMove.x * _currentSpeed);
-        Animator.SetFloat("Velocity Z", localMove.z * _currentSpeed);
+        _locomotion.Tick(dt, MovementControlFlags, direction, gravityY);
     }
 
     // =====================================================================
@@ -365,7 +345,7 @@ public class Agent : BaseWarriorAgent
     }
 
     /// <summary> Читает ли агент направление уже по замаху (иначе — только когда удар пошёл). </summary>
-    public bool RollReadsWindup() => Random.value < CognitiveAbilities.Perception / 100f;
+    public bool RollReadsWindup() => Random.value < _agentCognitiveAbilities.Perception / 100f;
 
     /// <summary>
     /// Сколько секунд агент готов держать блок, пока враг ещё в замахе.
@@ -373,8 +353,8 @@ public class Agent : BaseWarriorAgent
     /// </summary>
     public float RollBlockPatience()
     {
-        if (CognitiveAbilities.Composure >= 0.7f) return float.PositiveInfinity;
-        return Mathf.Lerp(3.2f, 6.2f, CognitiveAbilities.Composure / 0.7f) * Random.Range(0.8f, 1.2f);
+        if (_agentCognitiveAbilities.Composure >= 0.7f) return float.PositiveInfinity;
+        return Mathf.Lerp(3.2f, 6.2f, _agentCognitiveAbilities.Composure / 0.7f) * Random.Range(0.8f, 1.2f);
     }
 
     /// <summary>
@@ -384,16 +364,16 @@ public class Agent : BaseWarriorAgent
     /// </summary>
     public float RollReactionTime()
     {
-        float baseTime = Mathf.Lerp(0.55f, 0.12f, CognitiveAbilities.Reaction / 100f);
-        float jitter = Mathf.Lerp(0.30f, 0.08f, CognitiveAbilities.Coordination / 100f);
+        float baseTime = Mathf.Lerp(0.55f, 0.12f, _agentCognitiveAbilities.Reaction / 100f);
+        float jitter = Mathf.Lerp(0.30f, 0.08f, _agentCognitiveAbilities.Coordination / 100f);
         return Mathf.Max(0.05f, baseTime * Random.Range(1f - jitter, 1f + jitter));
     }
 
     /// <summary> Шанс перепутать направление и поставить блок не туда. </summary>
-    public float DirectionMisreadChance => Mathf.Lerp(0.20f, 0.02f, CognitiveAbilities.Perception / 100f);
+    public float DirectionMisreadChance => Mathf.Lerp(0.20f, 0.02f, _agentCognitiveAbilities.Perception / 100f);
 
     /// <summary> Шанс решить «успею ударить первым» вместо блока. </summary>
-    public float CounterGambleChance => Mathf.Lerp(0.35f, 0.03f, CognitiveAbilities.Composure);
+    public float CounterGambleChance => Mathf.Lerp(0.35f, 0.03f, _agentCognitiveAbilities.Composure);
 
     private void Log(string message)
     {
@@ -504,7 +484,7 @@ public class Agent : BaseWarriorAgent
     {
         GuardDirection enemyGuard = TargetAgent.GuardDirection;
 
-        bool avoidGuard = enemyGuard != GuardDirection.None && Random.value < CognitiveAbilities.Perception / 100f;
+        bool avoidGuard = enemyGuard != GuardDirection.None && Random.value < _agentCognitiveAbilities.Perception / 100f;
 
         int start = Random.Range(0, AttackDirections.Length);
         for (int i = 0; i < AttackDirections.Length; i++)
@@ -517,10 +497,10 @@ public class Agent : BaseWarriorAgent
     }
 
     /// <summary> Пауза между атаками: хладнокровный выбирает момент дольше, торопыга бьёт чаще. </summary>
-    private float RollAttackCooldown() => Mathf.Lerp(0.4f, 1.6f, CognitiveAbilities.Composure) * Random.Range(0.7f, 1.3f);
+    private float RollAttackCooldown() => Mathf.Lerp(0.4f, 1.6f, _agentCognitiveAbilities.Composure) * Random.Range(0.7f, 1.3f);
 
     /// <summary> Сколько агент готов ждать «окна», прежде чем ударить без него. </summary>
-    private float RollMaxWaitForOpening() => Mathf.Lerp(0.6f, 2.5f, CognitiveAbilities.Composure) * Random.Range(0.8f, 1.2f);
+    private float RollMaxWaitForOpening() => Mathf.Lerp(0.6f, 2.5f, _agentCognitiveAbilities.Composure) * Random.Range(0.8f, 1.2f);
 
     /// <summary>
     /// Возвращает true, только если замах реально начался (иначе AttackDecision не меняем).
