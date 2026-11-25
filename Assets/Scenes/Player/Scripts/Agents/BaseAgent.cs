@@ -17,7 +17,7 @@ public abstract class BaseAgent : MonoBehaviour
             throw new Exception($"Агент {name} НЕ СМОГ подписаться: BattleManager.Instance равен null!");
         }
         
-        // Добавляем агента в список тех, кто на карте
+        // Добавляем агента в список тех, кто на карте (при спавне)
         _agentsList?.Add(this);
     }
 
@@ -31,7 +31,7 @@ public abstract class BaseAgent : MonoBehaviour
             BattleManager.Instance.OnLateTick -= OnLateTick;
         }
 
-        // Удаляем агента из списка тех, кто на карте
+        // Удаляем агента из списка тех, кто на карте (при смерти)
         _agentsList?.Remove(this);
     }
 

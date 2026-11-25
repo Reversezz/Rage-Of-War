@@ -10,6 +10,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("Слои, по которым бьет оружие (Agent, Weapon, Obstacle)")]
     public LayerMask HitLayers;
 
+    // Типы урона в зависимости от типа оружия
     public DamageType DamageType => WeaponType switch
     {
         WeaponType.OneHanded => DamageType.Cut,

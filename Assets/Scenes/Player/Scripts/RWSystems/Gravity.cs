@@ -15,6 +15,7 @@ public class Gravity : MonoBehaviour
     public bool isGrounded;
     
 
+    /// <summary> Обновление гравитации каждый тик </summary>
     public void AgentGravityUpdate(float dt)
     {
         isGrounded = controller.isGrounded;

@@ -80,8 +80,6 @@ public class PlayerAgent : BaseWarriorAgent
         _cinemachineTargetYaw = playerCameraTarget.eulerAngles.y;
     }
 
-    private float _debugCooldown;
-
     private AttackDirection _validAttackDirection = AttackDirection.None;
     protected override void OnTick(float dt)
     {
