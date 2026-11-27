@@ -75,3 +75,5 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 Assets/Scenes/Player/Map Assets/Sky/Skyboxes/UNS_HDRI.hdr
 Assets/Scenes/Player/Map Assets/Sky/Skyboxes/UNS_HDRI.hdr.meta
+Assets/Scenes/Resources/Map Assets/Sky/Skyboxes/UNS_HDRI.hdr
+Assets/Scenes/Resources/Map Assets/Sky/Skyboxes/UNS_HDRI.hdr.meta
